@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "camera-detection"
+version = "0.1.0"
+description = ""
+authors = ["Shourya Sharma <shourya.sharma@complyadvantage.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+transformers = "^4.41.2"
+einops = "^0.8.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
