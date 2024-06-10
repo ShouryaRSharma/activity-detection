@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
-from activity_detection.camera_input import IPCamera
+from activity_detection.camera_input import IPCamera, LocalCamera
 import numpy as np
 
 
@@ -23,8 +23,8 @@ def test_start_capture_failure(mock_video_capture):
     mock_capture.isOpened.return_value = False
     mock_video_capture.return_value = mock_capture
 
-    camera = IPCamera("invalid_url")
-    with pytest.raises(IOError, match="Cannot open IP camera stream"):
+    camera = IPCamera("rtsp://example.com/stream")
+    with pytest.raises(IOError, match="Cannot open camera"):
         camera.start_capture()
 
 
@@ -59,7 +59,7 @@ def test_get_frame_success(mock_video_capture):
 
 def test_get_frame_failure():
     camera = IPCamera("rtsp://example.com/stream")
-    with pytest.raises(IOError, match="IP camera capture is not initialized"):
+    with pytest.raises(IOError, match="Camera capture is not initialized"):
         camera.get_frame()
 
 
@@ -71,5 +71,29 @@ def test_get_frame_read_failure(mock_video_capture):
 
     camera = IPCamera("rtsp://example.com/stream")
     camera.start_capture()
-    with pytest.raises(IOError, match="Failed to retrieve frame from IP camera"):
+    with pytest.raises(IOError, match="Failed to retrieve frame from camera"):
         camera.get_frame()
+
+
+@patch("cv2.VideoCapture")
+def test_local_camera_start_capture_success(mock_video_capture):
+    mock_capture = Mock()
+    mock_capture.isOpened.return_value = True
+    mock_video_capture.return_value = mock_capture
+
+    camera = LocalCamera()
+    camera.start_capture()
+
+    assert camera.capture == mock_capture
+    assert camera.capture.isOpened.called
+
+
+@patch("cv2.VideoCapture")
+def test_local_camera_start_capture_failure(mock_video_capture):
+    mock_capture = Mock()
+    mock_capture.isOpened.return_value = False
+    mock_video_capture.return_value = mock_capture
+
+    camera = LocalCamera()
+    with pytest.raises(IOError, match="Cannot open camera"):
+        camera.start_capture()
