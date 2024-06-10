@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+import torch
 from PIL import Image
 from transformers import (
     AutoModelForCausalLM,
@@ -19,12 +20,15 @@ class ActivityDetectionInterface(ABC):
 
 class MoondreamActivityDetector(ActivityDetectionInterface):
     def __init__(self, model_id: str, revision: str):
-        mps_device = get_device().value
-        print(f"Using device: {mps_device}")
+        device = get_device().value
+        print(f"Using device: {device}")
         self.model: PreTrainedModel = AutoModelForCausalLM.from_pretrained(
-            model_id, trust_remote_code=True, revision=revision
-        )
-        self.model.to(mps_device)
+            model_id,
+            trust_remote_code=True,
+            revision=revision,
+            torch_dtype=torch.float16,
+            attn_implementation="flash_attention_2",
+        ).to(device)
         self.tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(
             model_id, revision=revision
         )
