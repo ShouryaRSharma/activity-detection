@@ -400,6 +400,28 @@ files = [
 ]
 
 [[package]]
+name = "opencv-contrib-python-headless"
+version = "4.10.0.82"
+description = "Wrapper package for OpenCV python bindings."
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "opencv-contrib-python-headless-4.10.0.82.tar.gz", hash = "sha256:5d7abbfd0e15645653855d727fb844fb4b648daf1eb94a213dabccb7c402a892"},
+    {file = "opencv_contrib_python_headless-4.10.0.82-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:009b578863e7dc168381688cb86f62d100a8ed15277d906b6730df061a8b3c2e"},
+    {file = "opencv_contrib_python_headless-4.10.0.82-cp37-abi3-macosx_12_0_x86_64.whl", hash = "sha256:eb73e683d8377551747c3e0965686097847c5f9d1dfeb3bd37d6decd39c5dc37"},
+    {file = "opencv_contrib_python_headless-4.10.0.82-cp37-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:8658f74712e9bcec253ea6c469bdce709e91818833d526f5fb17ebcb0f0e7c73"},
+    {file = "opencv_contrib_python_headless-4.10.0.82-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8a1a744d189862936213f0e208379aac52d017c5206e10ef6e93f973d20a04e9"},
+    {file = "opencv_contrib_python_headless-4.10.0.82-cp37-abi3-win32.whl", hash = "sha256:a8ef95e4addfe14367f8fc79b8e80dcdb7e3a8fe216268af909f44266aec093d"},
+    {file = "opencv_contrib_python_headless-4.10.0.82-cp37-abi3-win_amd64.whl", hash = "sha256:637fd035478d938a95c478c59bc54ff10a32ac4bd49bf541d92f2e6372b78a65"},
+]
+
+[package.dependencies]
+numpy = [
+    {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
+    {version = ">=1.23.5", markers = "python_version >= \"3.11\" and python_version < \"3.12\""},
+]
+
+[[package]]
 name = "packaging"
 version = "24.1"
 description = "Core utilities for Python packages"
@@ -815,6 +837,21 @@ testing = ["h5py (>=3.7.0)", "huggingface-hub (>=0.12.1)", "hypothesis (>=6.70.2
 torch = ["safetensors[numpy]", "torch (>=1.10)"]
 
 [[package]]
+name = "setuptools"
+version = "70.0.0"
+description = "Easily download, build, install, upgrade, and uninstall Python packages"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "setuptools-70.0.0-py3-none-any.whl", hash = "sha256:54faa7f2e8d2d11bcd2c07bed282eef1046b5c080d1c32add737d7b5817b1ad4"},
+    {file = "setuptools-70.0.0.tar.gz", hash = "sha256:f211a66637b8fa059bb28183da127d4e86396c991a942b028c6650d4319c3fd0"},
+]
+
+[package.extras]
+docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "pygments-github-lexers (==0.0.5)", "pyproject-hooks (!=1.1)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-favicon", "sphinx-inline-tabs", "sphinx-lint", "sphinx-notfound-page (>=1,<2)", "sphinx-reredirects", "sphinxcontrib-towncrier"]
+testing = ["build[virtualenv] (>=1.0.3)", "filelock (>=3.4.0)", "importlib-metadata", "ini2toml[lite] (>=0.14)", "jaraco.develop (>=7.21)", "jaraco.envs (>=2.2)", "jaraco.path (>=3.2.0)", "mypy (==1.9)", "packaging (>=23.2)", "pip (>=19.1)", "pyproject-hooks (!=1.1)", "pytest (>=6,!=8.1.1)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-home (>=0.5)", "pytest-mypy", "pytest-perf", "pytest-ruff (>=0.2.1)", "pytest-subprocess", "pytest-timeout", "pytest-xdist (>=3)", "tomli", "tomli-w (>=1.0.0)", "virtualenv (>=13.0.0)", "wheel"]
+
+[[package]]
 name = "tokenizers"
 version = "0.19.1"
 description = ""
@@ -1068,4 +1105,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "bdd0cfa1a5ea4fc45979d72a048d81efb9299aaedeea4c28f46eea6bda80c66f"
+content-hash = "b7d7706f792d70a363768e955eab32d67bcce41c649e924b85c6b2202f40b89f"
