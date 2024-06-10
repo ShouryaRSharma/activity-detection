@@ -1,3 +1,7 @@
 .idea
 
 **/*/__pycache__/
+
+.coverage
+test-reports
+coverage.xml

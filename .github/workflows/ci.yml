@@ -25,15 +25,18 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-buildx-
 
-    - name: Build Docker image
-      run: docker build -t my-app:latest .
+    - name: Build Docker image for testing
+      run: docker build --target test -t my-app:test .
 
     - name: Save Docker image as artifact
+      run: |
+        docker save my-app:test -o my-app-test.tar
+
+    - name: Upload Docker image artifact
       uses: actions/upload-artifact@v3
       with:
-        name: my-app-image
-        path: |
-          $(docker save my-app:latest -o my-app-latest.tar)
+        name: my-app-test-image
+        path: my-app-test.tar
 
   test:
     needs: build
@@ -46,14 +49,20 @@ jobs:
     - name: Download Docker image artifact
       uses: actions/download-artifact@v3
       with:
-        name: my-app-image
-        path: my-app-latest.tar
+        name: my-app-test-image
 
     - name: Load Docker image
-      run: docker load -i my-app-latest.tar
+      run: docker load -i my-app-test.tar
 
-    - name: Run pre-commit hooks
-      run: docker run my-app:latest poetry run pre-commit run --all-files
+    - name: Run tests
+      uses: addnab/docker-run-action@v3
+      with:
+        image: my-app:test
+        options: --entrypoint ""
+        run: poetry run pytest --cov=. --cov-report=xml --cov-report=term --cov-report=html --junitxml=./test-reports/junit.xml
 
-    - name: Run tests in Docker container
-      run: docker run my-app:latest poetry run pytest
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: ./test-reports

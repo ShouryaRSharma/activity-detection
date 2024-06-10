@@ -1,4 +1,4 @@
-ARG POETRY_VERSION=1.4.2
+ARG POETRY_VERSION=1.8.2
 
 FROM python:3.11.4 AS base
 
@@ -32,6 +32,8 @@ RUN addgroup --system activity_detection \
 
 FROM app-base AS test
 
+ENV POETRY_VIRTUALENVS_CREATE=false
+
 COPY --from=base /temp/requirements-dev.txt /code/requirements-dev.txt
 
 # Installing dev requirements as root
@@ -47,6 +49,8 @@ COPY ./poetry.lock /code/poetry.lock
 ENTRYPOINT ["python", "-m", "activity_detection.main"]
 
 FROM app-base AS production
+
+ENV POETRY_VIRTUALENVS_CREATE=false
 
 COPY --from=base /temp/requirements.txt /code/requirements.txt
 
