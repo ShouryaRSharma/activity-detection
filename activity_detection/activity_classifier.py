@@ -8,6 +8,8 @@ from transformers import (
     PreTrainedTokenizer,
 )
 
+from activity_detection.devices import get_device
+
 
 class ActivityDetectionInterface(ABC):
     @abstractmethod
@@ -17,9 +19,12 @@ class ActivityDetectionInterface(ABC):
 
 class MoondreamActivityDetector(ActivityDetectionInterface):
     def __init__(self, model_id: str, revision: str):
+        mps_device = get_device().value
+        print(f"Using device: {mps_device}")
         self.model: PreTrainedModel = AutoModelForCausalLM.from_pretrained(
             model_id, trust_remote_code=True, revision=revision
         )
+        self.model.to(mps_device)
         self.tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(
             model_id, revision=revision
         )
