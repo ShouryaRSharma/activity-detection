@@ -28,6 +28,7 @@ class IPCamera(CameraInputInterface):
         self.capture = cv2.VideoCapture(self.camera_url)
         if not self.capture.isOpened():
             raise IOError("Cannot open IP camera stream")
+        self.capture.set(cv2.CAP_PROP_FPS, 20)
 
     def stop_capture(self):
         """Stop capturing the live stream from the IP camera."""
