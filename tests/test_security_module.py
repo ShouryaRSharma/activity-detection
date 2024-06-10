@@ -1,5 +1,5 @@
 import pytest
-from camera_detection.security_module import DefaultVideoCapture
+from activity_detection.security_module import DefaultVideoCapture
 
 
 @pytest.mark.xfail(reason="Not implemented yet")

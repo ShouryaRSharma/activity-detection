@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "camera-detection"
+name = "activity-detection"
 version = "0.1.0"
 description = ""
 authors = ["Shourya Sharma <shourya.sharma@complyadvantage.com>"]
@@ -9,7 +9,6 @@ readme = "README.md"
 python = "^3.11"
 transformers = "^4.41.2"
 einops = "^0.8.0"
-
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.4.8"

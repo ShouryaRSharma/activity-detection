@@ -1,5 +1,5 @@
 import pytest
-from camera_detection.activity_detection import SuspiciousActivityDetector
+from activity_detection.activity_detection import SuspiciousActivityDetector
 
 
 @pytest.mark.xfail(reason="Not implemented yet")

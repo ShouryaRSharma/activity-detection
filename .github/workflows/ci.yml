@@ -1,0 +1,59 @@
+name: CI with Docker
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Cache Docker layers
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+
+    - name: Build Docker image
+      run: docker build -t my-app:latest .
+
+    - name: Save Docker image as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: my-app-image
+        path: |
+          $(docker save my-app:latest -o my-app-latest.tar)
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Download Docker image artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: my-app-image
+        path: my-app-latest.tar
+
+    - name: Load Docker image
+      run: docker load -i my-app-latest.tar
+
+    - name: Run pre-commit hooks
+      run: docker run my-app:latest poetry run pre-commit run --all-files
+
+    - name: Run tests in Docker container
+      run: docker run my-app:latest poetry run pytest
