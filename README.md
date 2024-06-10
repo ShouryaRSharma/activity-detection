@@ -5,8 +5,11 @@ The Suspicious Activity Detection System is a Python application that monitors a
 ## Architecture Diagram
 
 [architecture-diagram]: ./docs/architecture-diagram.svg
+[low-level-diagram]: ./docs/low-level-module-architecture.svg
 
 ![Architecture Diagram][architecture-diagram]
+
+![Low-Level Module Architecture Diagram][low-level-diagram]
 
 ## Key Features
 
