@@ -35,7 +35,8 @@ class MoondreamActivityDetector(ActivityDetectionInterface):
         """
         prompt = "Is there a person close to the camera in this image? (Only answer 'YES' or 'NO')"
         encoded_image = self.model.encode_image(image)
-        answer = self.model.answer_question(encoded_image, prompt, self.tokenizer)
-        if answer not in ["YES", "NO"]:
+        answer: str = self.model.answer_question(encoded_image, prompt, self.tokenizer)
+        if answer.lower() not in ["yes", "no"]:
+            print(answer)
             raise ValueError("Invalid answer from the model")
-        return answer == "YES"
+        return answer.lower() == "yes"

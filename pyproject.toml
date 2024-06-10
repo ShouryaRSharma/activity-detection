@@ -13,12 +13,16 @@ setuptools = "^70.0.0"
 opencv-contrib-python-headless = "^4.10.0.82"
 pillow = "^10.3.0"
 torch = "^2.3.1"
+torchvision = "^0.18.1"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.4.8"
 pytest = "^8.2.2"
 pre-commit = "^3.7.1"
 pytest-cov = "^5.0.0"
+
+[tool.poetry.scripts]
+activity-detection = "activity_detection.main:main"
 
 [build-system]
 requires = ["poetry-core"]

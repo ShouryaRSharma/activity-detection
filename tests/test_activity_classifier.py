@@ -1,7 +1,7 @@
 from unittest.mock import patch
 from PIL import Image
 import pytest
-from activity_detection.activity_detection import MoondreamActivityDetector
+from activity_detection.activity_classifier import MoondreamActivityDetector
 
 
 @patch("transformers.AutoModelForCausalLM.from_pretrained")
