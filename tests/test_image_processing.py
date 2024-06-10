@@ -1,5 +1,5 @@
 import pytest
-from camera_detection.image_processing import MoondreamImageProcessor
+from activity_detection.image_processing import MoondreamImageProcessor
 
 
 @pytest.mark.xfail(reason="Not implemented yet")

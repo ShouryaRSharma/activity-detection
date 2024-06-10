@@ -1,5 +1,5 @@
 import pytest
-from camera_detection.camera_input import IPCamera
+from activity_detection.camera_input import IPCamera
 
 
 @pytest.mark.xfail(reason="Not implemented yet")
