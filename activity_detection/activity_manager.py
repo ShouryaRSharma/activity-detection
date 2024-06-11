@@ -2,11 +2,13 @@ import threading
 import time
 from queue import Queue, Full, Empty
 from typing import TypeVar
-from activity_detection.camera_input import CameraInputInterface
-from activity_detection.image_processing import ImageProcessingInterface
-from activity_detection.activity_classifier import ActivityDetectionInterface
+from activity_detection.inputs.camera_input import CameraInputInterface
+from activity_detection.processing.image_processing import ImageProcessingInterface
+from activity_detection.classifiers.activity_classifier import (
+    ActivityDetectionInterface,
+)
 from activity_detection.logging_config import setup_logger
-from activity_detection.security_module import SecurityModule
+from activity_detection.security.security_module import SecurityModule
 
 T = TypeVar("T")
 

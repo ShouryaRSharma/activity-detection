@@ -1,7 +1,7 @@
-from activity_detection.camera_input import IPCamera
-from activity_detection.image_processing import MoondreamImageProcessor
-from activity_detection.activity_classifier import MoondreamActivityDetector
-from activity_detection.security_module import (
+from activity_detection.inputs.camera_input import IPCamera
+from activity_detection.processing.image_processing import MoondreamImageProcessor
+from activity_detection.classifiers.activity_classifier import MoondreamActivityDetector
+from activity_detection.security.security_module import (
     SecurityModule,
     DefaultVideoCapture,
     DefaultSecurityLogging,

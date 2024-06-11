@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
-from activity_detection.camera_input import IPCamera, LocalCamera
+from activity_detection.inputs.camera_input import IPCamera, LocalCamera
 import numpy as np
 
 
@@ -8,6 +8,7 @@ import numpy as np
 def test_start_capture_success(mock_video_capture):
     mock_capture = Mock()
     mock_capture.isOpened.return_value = True
+    mock_capture.get.return_value = 30
     mock_video_capture.return_value = mock_capture
 
     camera = IPCamera("rtsp://example.com/stream")
@@ -21,6 +22,7 @@ def test_start_capture_success(mock_video_capture):
 def test_start_capture_failure(mock_video_capture):
     mock_capture = Mock()
     mock_capture.isOpened.return_value = False
+    mock_capture.get.return_value = 0
     mock_video_capture.return_value = mock_capture
 
     camera = IPCamera("rtsp://example.com/stream")
@@ -31,6 +33,7 @@ def test_start_capture_failure(mock_video_capture):
 @patch("cv2.VideoCapture")
 def test_stop_capture(mock_video_capture):
     mock_capture = Mock()
+    mock_capture.get.return_value = 30
     mock_video_capture.return_value = mock_capture
 
     camera = IPCamera("rtsp://example.com/stream")
@@ -45,6 +48,7 @@ def test_stop_capture(mock_video_capture):
 def test_get_frame_success(mock_video_capture):
     mock_frame = np.array([[1, 2], [3, 4]])
     mock_capture = Mock()
+    mock_capture.get.return_value = 30
     mock_capture.read.return_value = (True, mock_frame)
     mock_video_capture.return_value = mock_capture
 
@@ -66,6 +70,7 @@ def test_get_frame_failure():
 @patch("cv2.VideoCapture")
 def test_get_frame_read_failure(mock_video_capture):
     mock_capture = Mock()
+    mock_capture.get.return_value = 30
     mock_capture.read.return_value = (False, None)
     mock_video_capture.return_value = mock_capture
 
@@ -79,6 +84,7 @@ def test_get_frame_read_failure(mock_video_capture):
 def test_local_camera_start_capture_success(mock_video_capture):
     mock_capture = Mock()
     mock_capture.isOpened.return_value = True
+    mock_capture.get.return_value = 30
     mock_video_capture.return_value = mock_capture
 
     camera = LocalCamera()
