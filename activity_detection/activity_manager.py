@@ -1,5 +1,4 @@
 import threading
-import time
 from queue import Queue, Full, Empty
 from typing import TypeVar
 from activity_detection.inputs.camera_input import CameraInputInterface
@@ -25,37 +24,30 @@ class ActivityManager:
         self.image_processor = image_processor
         self.activity_detector = activity_detector
         self.security_module = security_module
-        self.frame_queue = Queue(maxsize=100)  # Increased queue size
-        self.processed_frame_queue = Queue(maxsize=100)  # Increased queue size
+        self.frame_queue = Queue(maxsize=100)
+        self.processed_frame_queue = Queue(maxsize=100)
         self.running = True
         self.logger = setup_logger(self.__class__.__name__)
 
     def capture_frames(self):
         self.camera_input.start_capture()
-        frame_count = 0
-        frame_skipping_interval = 6  # Adjust this value as needed
         while self.running:
             frame = self.camera_input.get_frame()
-            frame_count += 1
-            if frame_count % frame_skipping_interval != 0:
-                try:
-                    self.frame_queue.put_nowait(frame)
-                except Full:
-                    self.logger.warning("Frame queue is full. Skipping frame.")
-            time.sleep(0.1)  # Adding a delay to match the processing speed
+            try:
+                self.frame_queue.put_nowait(frame)
+            except Full:
+                self.logger.warning("Frame queue is full. Skipping frame.")
 
     def process_frames(self):
         while self.running:
             try:
-                frame = self.frame_queue.get(
-                    timeout=1
-                )  # Wait for a frame if the queue is empty
+                frame = self.frame_queue.get()
                 processed_image = self.image_processor.process_frame(frame)
                 activity_detected = self.activity_detector.detect_activity(
                     processed_image
                 )
                 try:
-                    self.processed_frame_queue.put_nowait((frame, activity_detected))
+                    self.processed_frame_queue.put((frame, activity_detected))
                 except Full:
                     self.logger.warning(
                         "Processed frame queue is full. Skipping frame."
@@ -66,9 +58,7 @@ class ActivityManager:
     def write_video(self):
         while self.running:
             try:
-                frame, activity_detected = self.processed_frame_queue.get(
-                    timeout=1
-                )  # Wait for a frame if the queue is empty
+                frame, activity_detected = self.processed_frame_queue.get()
                 self.security_module.process_frame(frame, activity_detected)
             except Empty:
                 pass

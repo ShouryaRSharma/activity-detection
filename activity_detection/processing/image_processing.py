@@ -9,7 +9,7 @@ class ImageProcessingInterface(ABC):
         pass
 
 
-class MoondreamImageProcessor(ImageProcessingInterface):
+class DefaultImageProcessor(ImageProcessingInterface):
     def process_frame(self, frame: np.ndarray) -> Image:
         """Pre-process the frame from an array into an image.
 
