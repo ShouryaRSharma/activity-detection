@@ -15,3 +15,4 @@ suspicious_activity_*.mp4
 yolov8m-worldv2.pt
 
 .env
+config.yaml
