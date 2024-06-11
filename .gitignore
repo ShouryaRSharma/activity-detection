@@ -5,3 +5,6 @@
 .coverage
 test-reports
 coverage.xml
+
+.DS_Store
+suspicious_activity.*
