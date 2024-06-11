@@ -1,6 +1,6 @@
 import numpy as np
 from PIL import Image
-from activity_detection.image_processing import MoondreamImageProcessor
+from activity_detection.processing.image_processing import MoondreamImageProcessor
 
 
 def test_process_frame():

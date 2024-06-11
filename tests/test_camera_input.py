@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
-from activity_detection.camera_input import IPCamera, LocalCamera
+from activity_detection.inputs.camera_input import IPCamera, LocalCamera
 import numpy as np
 
 

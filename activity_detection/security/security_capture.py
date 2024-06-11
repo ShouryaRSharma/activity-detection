@@ -1,7 +1,8 @@
-from abc import ABC, abstractmethod
+import datetime
+from abc import abstractmethod, ABC
+
 import cv2
 import numpy as np
-import datetime
 
 from activity_detection.logging_config import setup_logger
 
@@ -50,48 +51,3 @@ class DefaultVideoCapture(VideoCaptureInterface):
         if self.video_writer:
             self.video_writer.write(frame)
             self.logger.info("Frame captured...")
-
-
-class SecurityLoggingInterface(ABC):
-    @abstractmethod
-    def log_suspicious_activity(self):
-        pass
-
-    @abstractmethod
-    def log_no_suspicious_activity(self):
-        pass
-
-
-class DefaultSecurityLogging(SecurityLoggingInterface):
-    def __init__(self):
-        self.logger = setup_logger(self.__class__.__name__)
-
-    def log_suspicious_activity(self):
-        self.logger.info("Suspicious activity detected!")
-
-    def log_no_suspicious_activity(self):
-        self.logger.info("No suspicious activity detected.")
-
-
-class SecurityModule:
-    def __init__(
-        self,
-        video_capture: VideoCaptureInterface,
-        security_logging: SecurityLoggingInterface,
-    ):
-        self.video_capture = video_capture
-        self.security_logging = security_logging
-        self.suspicious_activity = False
-
-    def process_frame(self, frame: np.ndarray, suspicious_activity: bool):
-        if suspicious_activity and not self.suspicious_activity:
-            self.video_capture.start_video_capture()
-            self.security_logging.log_suspicious_activity()
-            self.suspicious_activity = True
-        elif not suspicious_activity and self.suspicious_activity:
-            self.video_capture.stop_video_capture()
-            self.security_logging.log_no_suspicious_activity()
-            self.suspicious_activity = False
-
-        if self.suspicious_activity:
-            self.video_capture.capture_frame(frame)
