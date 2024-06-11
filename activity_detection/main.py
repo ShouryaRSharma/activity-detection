@@ -1,3 +1,7 @@
+from dotenv import load_dotenv
+
+import os
+
 from activity_detection.inputs.camera_input import IPCamera
 from activity_detection.processing.image_processing import DefaultImageProcessor
 from activity_detection.classifiers.activity_classifier import YOLOActivityDetector
@@ -8,7 +12,8 @@ from activity_detection.activity_manager import ActivityManager
 
 
 def main():
-    ipv4_address = "http://192.168.1.111:8080/video"
+    load_dotenv()
+    ipv4_address = os.getenv("IPV4_ADDRESS")
     camera_input = IPCamera(ipv4_address)
     image_processor = DefaultImageProcessor()
     activity_detector = YOLOActivityDetector()

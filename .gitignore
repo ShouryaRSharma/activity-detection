@@ -13,3 +13,5 @@ suspicious_activity_*.mp4
 
 # Ignore specific model file
 yolov8m-worldv2.pt
+
+.env
