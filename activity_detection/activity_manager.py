@@ -115,40 +115,28 @@ class ActivityManager:
 
     @classmethod
     def from_config(cls, config: dict[str | None]):
-        camera_input_config = config["camera_input"]
-        camera_input_class = next(iter(camera_input_config))
-        camera_input_args = camera_input_config[camera_input_class].get("args", ())
-        camera_input = cls.create_object(
-            "camera_input", camera_input_class, *camera_input_args
+        components = {}
+
+        for component_type, component_config in config.items():
+            if component_type == "security_module":
+                continue
+
+            class_name = next(iter(component_config))
+            args = component_config[class_name].get("args", ())
+            components[component_type] = cls.create_object(
+                component_type, class_name, *args
+            )
+
+        security_module = SecurityModule(
+            components["video_capture"], components["security_logging"]
         )
 
-        image_processor_config = config["image_processor"]
-        image_processor_class = next(iter(image_processor_config))
-        image_processor = cls.create_object("image_processor", image_processor_class)
-
-        activity_detector_config = config["activity_detector"]
-        activity_detector_class = next(iter(activity_detector_config))
-        activity_detector_args = activity_detector_config[activity_detector_class].get(
-            "args", ()
+        return cls(
+            components["camera_input"],
+            components["image_processor"],
+            components["activity_detector"],
+            security_module,
         )
-        activity_detector = cls.create_object(
-            "activity_detector", activity_detector_class, *activity_detector_args
-        )
-
-        security_logging_config = config["security_logging"]
-        security_logging_class = next(iter(security_logging_config))
-        security_logging = cls.create_object("security_logging", security_logging_class)
-
-        video_capture_config = config["video_capture"]
-        video_capture_class = next(iter(video_capture_config))
-        video_capture_args = video_capture_config[video_capture_class].get("args", ())
-        video_capture = cls.create_object(
-            "video_capture", video_capture_class, *video_capture_args
-        )
-
-        security_module = SecurityModule(video_capture, security_logging)
-
-        return cls(camera_input, image_processor, activity_detector, security_module)
 
     @staticmethod
     def create_object(component_type: str, class_name: str, *args, **kwargs):

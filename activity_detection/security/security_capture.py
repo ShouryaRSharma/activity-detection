@@ -35,7 +35,7 @@ class DefaultVideoCapture(VideoCaptureInterface):
             fourcc = cv2.VideoWriter.fourcc("m", "p", "4", "v")
             frame_size = (1920, 1080)
             self.video_writer = cv2.VideoWriter(
-                self.output_file, fourcc, 25.0, frame_size
+                self.output_file, fourcc, 24.0, frame_size
             )
 
         if not self.video_writer.isOpened():
@@ -50,4 +50,3 @@ class DefaultVideoCapture(VideoCaptureInterface):
     def capture_frame(self, frame: np.ndarray):
         if self.video_writer:
             self.video_writer.write(frame)
-            self.logger.info("Frame captured...")

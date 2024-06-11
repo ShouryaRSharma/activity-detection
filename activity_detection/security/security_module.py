@@ -9,7 +9,7 @@ class SecurityModule:
         self,
         video_capture: VideoCaptureInterface,
         security_logging: SecurityLoggingInterface,
-        stop_threshold: int = 5,
+        stop_threshold: int = 75,  # 3 seconds
     ):
         self.video_capture = video_capture
         self.security_logging = security_logging
