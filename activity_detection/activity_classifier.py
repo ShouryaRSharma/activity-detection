@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+import torch
 from PIL import Image
 from transformers import (
     AutoModelForCausalLM,
@@ -9,6 +10,7 @@ from transformers import (
 )
 
 from activity_detection.devices import get_device
+from activity_detection.logging_config import setup_logger
 
 
 class ActivityDetectionInterface(ABC):
@@ -19,14 +21,17 @@ class ActivityDetectionInterface(ABC):
 
 class MoondreamActivityDetector(ActivityDetectionInterface):
     def __init__(self, model_id: str, revision: str):
-        mps_device = get_device().value
-        print(f"Using device: {mps_device}")
+        self.logger = setup_logger(self.__class__.__name__)
+        device = get_device().value
+        self.logger.info(f"Using device: {device}")
         self.model: PreTrainedModel = AutoModelForCausalLM.from_pretrained(
-            model_id, trust_remote_code=True, revision=revision
-        )
-        self.model.to(mps_device)
+            model_id,
+            trust_remote_code=True,
+            revision=revision,
+            torch_dtype=torch.float32,
+        ).to(device)
         self.tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(
-            model_id, revision=revision
+            model_id, revision=revision, use_fast=True
         )
 
     def detect_activity(self, image: Image) -> bool:
@@ -42,6 +47,5 @@ class MoondreamActivityDetector(ActivityDetectionInterface):
         encoded_image = self.model.encode_image(image)
         answer: str = self.model.answer_question(encoded_image, prompt, self.tokenizer)
         if answer.lower() not in ["yes", "no"]:
-            print(answer)
             raise ValueError("Invalid answer from the model")
         return answer.lower() == "yes"

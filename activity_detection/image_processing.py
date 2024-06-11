@@ -9,15 +9,15 @@ class ImageProcessingInterface(ABC):
         pass
 
 
-class MoondreamImageProcessor:
-    def process_frame(self, frame: np.ndarray) -> str:
-        """Encode the input frame using the Moondream model.
+class MoondreamImageProcessor(ImageProcessingInterface):
+    def process_frame(self, frame: np.ndarray) -> Image:
+        """Pre-process the frame from an array into an image.
 
         Args:
             frame (np.ndarray): The input frame to process
 
         Returns:
-            str: Base64 encoded string of the processed frame
+            Image: The processed image
         """
         image = self._preprocess_frame(frame)
         return image
