@@ -25,7 +25,7 @@ class CameraInputInterface(ABC):
 class CameraBase(CameraInputInterface):
     def __init__(self):
         self.capture = None
-        self.target_fps = 10  # Desired frame rate
+        self.target_fps = 24
         self.original_fps = None
         self.frame_interval = None
         self.last_frame_time = None
