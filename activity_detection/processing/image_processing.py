@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+
+import cv2
 from PIL import Image
 import numpy as np
 
@@ -24,6 +26,6 @@ class DefaultImageProcessor(ImageProcessingInterface):
 
     @staticmethod
     def _preprocess_frame(frame: np.ndarray) -> Image:
-        image = Image.fromarray(frame)
+        image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
         image = image.resize((1920, 1080))
         return image
