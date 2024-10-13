@@ -10,9 +10,11 @@ coverage.xml
 
 # Ignore all .mp4 files
 suspicious_activity_*.mp4
-
 # Ignore specific model file
 yolov8m-worldv2.pt
 
 .env
 config.yaml
+.ropeproject
+
+log_message.mp3

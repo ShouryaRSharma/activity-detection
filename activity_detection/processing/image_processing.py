@@ -7,7 +7,7 @@ import numpy as np
 
 class ImageProcessingInterface(ABC):
     @abstractmethod
-    def process_frame(self, frame):
+    def process_frame(self, frame) -> Image:
         pass
 
 

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+import numpy as np
 import torch
 from PIL import Image
 from transformers import (
@@ -9,7 +10,9 @@ from transformers import (
     PreTrainedTokenizer,
 )
 from ultralytics import YOLOWorld
+from ultralytics.engine.results import Boxes
 
+from activity_detection.classifiers.types import Prediction
 from activity_detection.devices import get_device
 from activity_detection.logging_config import setup_logger
 
@@ -21,7 +24,7 @@ class ActivityDetectionInterface(ABC):
         self.logger.info(f"Using device: {self.device.value}")
 
     @abstractmethod
-    def detect_activity(self, image: Image) -> bool:
+    def detect_activity(self, image: Image) -> Prediction:
         pass
 
 
@@ -38,7 +41,7 @@ class MoondreamActivityDetector(ActivityDetectionInterface):
             model_id, revision=revision, use_fast=True
         )
 
-    def detect_activity(self, image: Image) -> bool:
+    def detect_activity(self, image: Image) -> Prediction:
         """Detect if there is a person close to the camera in the input image.
 
         Args:
@@ -52,7 +55,7 @@ class MoondreamActivityDetector(ActivityDetectionInterface):
         answer: str = self.model.answer_question(encoded_image, prompt, self.tokenizer)
         if answer.lower() not in ["yes", "no"]:
             raise ValueError("Invalid answer from the model")
-        return answer.lower() == "yes"
+        return Prediction(detected=answer.lower() == "yes")
 
 
 class YOLOActivityDetector(ActivityDetectionInterface):
@@ -62,32 +65,33 @@ class YOLOActivityDetector(ActivityDetectionInterface):
         self.model.set_classes(["person"])
         self._confidence_threshold = 0.5
 
-    def detect_activity(self, image: Image) -> bool:
-        """Detect if there is a person close to the camera in the input image.
-
+    def detect_activity(self, image: Image) -> Prediction:
+        """Detect if there are people in the input image and return their bounding boxes.
         Args:
             image (Image): The input image to analyze
-
         Returns:
-            bool: True if a person is close to the camera, False otherwise
+            Prediction: A Prediction object containing a detection flag and a list of bounding boxes
         """
         person_detected = False
-
+        bounding_boxes = []
         results = self.model.predict(image)
         for result in results:
-            boxes = result.boxes
+            boxes: Boxes = result.boxes
             for box in boxes:
                 if (
                     "person" in result.names.values()
                     and box.conf > self._confidence_threshold
                 ):
                     person_detected = True
-                    break
+                    co_ords = (
+                        box.xyxy.cpu().numpy().flatten()
+                        if isinstance(box.xyxy, torch.Tensor)
+                        else box.xyxy.flatten()
+                    )
+                    bounding_boxes.append(co_ords)
 
-            if person_detected:
-                break
-
-        self.logger.info(
-            f"Person detected: {person_detected}"
-        ) if person_detected else None
-        return person_detected
+        num_people = len(bounding_boxes)
+        self.logger.info(f"Number of people detected: {num_people}")
+        return Prediction(
+            detected=person_detected, bounding_box=np.array(bounding_boxes)
+        )

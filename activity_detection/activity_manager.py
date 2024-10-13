@@ -72,11 +72,9 @@ class ActivityManager:
             try:
                 frame = self.frame_queue.get()
                 processed_image = self.image_processor.process_frame(frame)
-                activity_detected = self.activity_detector.detect_activity(
-                    processed_image
-                )
+                prediction = self.activity_detector.detect_activity(processed_image)
                 try:
-                    self.processed_frame_queue.put((frame, activity_detected))
+                    self.processed_frame_queue.put((frame, prediction))
                 except Full:
                     self.logger.warning(
                         "Processed frame queue is full. Skipping frame."
@@ -87,8 +85,8 @@ class ActivityManager:
     def write_video(self):
         while self.running:
             try:
-                frame, activity_detected = self.processed_frame_queue.get()
-                self.security_module.process_frame(frame, activity_detected)
+                frame, prediction = self.processed_frame_queue.get()
+                self.security_module.process_frame(frame, prediction)
             except Empty:
                 pass
 

@@ -1,10 +1,13 @@
 import yaml
 
+from pathlib import Path
 from activity_detection.activity_manager import ActivityManager
 
 
 def main():
-    with open("config.yaml", "r") as file:
+    current_dir = Path(__file__).parent.parent
+    config_file = current_dir / "config.yaml"
+    with open(config_file, "r") as file:
         config = yaml.safe_load(file)
 
     activity_manager = ActivityManager.from_config(config)
