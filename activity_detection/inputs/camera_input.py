@@ -18,7 +18,7 @@ class CameraInputInterface(ABC):
         pass
 
     @abstractmethod
-    def get_frame(self):
+    def get_frame(self) -> np.ndarray:
         pass
 
 
@@ -33,6 +33,9 @@ class CameraBase(CameraInputInterface):
 
     def start_capture(self):
         """Start capturing frames from the camera."""
+        if not self.capture:
+            raise ValueError("Camera capture is not initialized")
+
         if not self.capture.isOpened():
             raise IOError("Cannot open camera")
 
