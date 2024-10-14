@@ -1,5 +1,6 @@
 import threading
 from queue import Queue, Full, Empty
+from typing import Type
 from activity_detection.inputs.camera_input import (
     CameraInputInterface,
     IPCamera,
@@ -20,7 +21,7 @@ from activity_detection.security.security_logging import DefaultSecurityLogging
 from activity_detection.security.security_module import SecurityModule
 
 
-COMPONENT_MAPPING: dict[str, dict[str | None]] = {
+COMPONENT_MAPPING: dict[str, dict[str | None, Type]] = {
     "camera_input": {
         "IPCamera": IPCamera,
         "LocalCamera": LocalCamera,
