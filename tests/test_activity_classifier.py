@@ -1,3 +1,4 @@
+from activity_detection.classifiers.types import Prediction
 from unittest.mock import patch, MagicMock
 from PIL import Image
 import pytest
@@ -18,7 +19,8 @@ def test_detect_activity_with_person_close(mock_tokenizer, mock_model):
     result = detector.detect_activity(image)
 
     # Assert
-    assert result is True
+    assert isinstance(result, Prediction)
+    assert result.detected is True
     mock_model.return_value.to.return_value.answer_question.assert_called_once_with(
         mock_model.return_value.to.return_value.encode_image.return_value,
         "Is there a person close to the camera in this image? (Only answer 'YES' or 'NO')",
@@ -38,7 +40,8 @@ def test_detect_activity_without_person_close(mock_tokenizer, mock_model):
     result = detector.detect_activity(image)
 
     # Assert
-    assert result is False
+    assert isinstance(result, Prediction)
+    assert result.detected is False
     mock_model.return_value.to.return_value.answer_question.assert_called_once_with(
         mock_model.return_value.to.return_value.encode_image.return_value,
         "Is there a person close to the camera in this image? (Only answer 'YES' or 'NO')",
@@ -74,7 +77,7 @@ def test_detect_activity_with_person_detected(mock_yolo):
     # Act
     result = detector.detect_activity(image)
     # Assert
-    assert result is True
+    assert result.detected is True
     mock_model.predict.assert_called_once_with(image)
 
 
@@ -96,7 +99,7 @@ def test_detect_activity_without_person_detected(mock_yolo):
     result = detector.detect_activity(image)
 
     # Assert
-    assert result is False
+    assert result.detected is False
     mock_model.predict.assert_called_once_with(image)
 
 
@@ -118,5 +121,5 @@ def test_detect_activity_with_low_confidence(mock_yolo):
     result = detector.detect_activity(image)
 
     # Assert
-    assert result is False
+    assert result.detected is False
     mock_model.predict.assert_called_once_with(image)
