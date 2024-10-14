@@ -1,0 +1,26 @@
+camera_input:
+  # IPCamera:
+  #   args:
+  #     - "http://192.168.1.111:8080/video"
+  LocalCamera:
+    args:
+      - 0
+
+image_processor:
+  DefaultImageProcessor: {}
+
+activity_detector:
+  YOLOActivityDetector:
+    args:
+      - 0.9
+
+security_logging:
+  DefaultSecurityLogging: {}
+
+video_capture:
+  DefaultVideoCapture:
+    args:
+      - "suspicious_activity_videos"
+#  SQLiteVideoWriter:
+#    args:
+#      - "activity_detection.db"

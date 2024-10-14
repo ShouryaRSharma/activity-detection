@@ -1,25 +1,28 @@
 import threading
-from queue import Queue, Full, Empty
-from typing import Type
+from queue import Empty, Full, Queue
+from typing import Any, Type
+
+from activity_detection.classifiers import (
+    MoondreamActivityDetector,
+    YOLOActivityDetector,
+    YOLOWorldActivityDetector,
+)
+from activity_detection.classifiers.interfaces import (
+    ActivityDetectionInterface,
+)
 from activity_detection.inputs.camera_input import (
     CameraInputInterface,
     IPCamera,
     LocalCamera,
 )
-from activity_detection.processing.image_processing import (
-    ImageProcessingInterface,
-    DefaultImageProcessor,
-)
-from activity_detection.classifiers.activity_classifier import (
-    ActivityDetectionInterface,
-    MoondreamActivityDetector,
-    YOLOActivityDetector,
-)
 from activity_detection.logging_config import setup_logger
+from activity_detection.processing.image_processing import (
+    DefaultImageProcessor,
+    ImageProcessingInterface,
+)
 from activity_detection.security.security_capture import DefaultVideoCapture
 from activity_detection.security.security_logging import DefaultSecurityLogging
 from activity_detection.security.security_module import SecurityModule
-
 
 COMPONENT_MAPPING: dict[str, dict[str | None, Type]] = {
     "camera_input": {
@@ -31,6 +34,7 @@ COMPONENT_MAPPING: dict[str, dict[str | None, Type]] = {
     },
     "activity_detector": {
         "YOLOActivityDetector": YOLOActivityDetector,
+        "YOLOWorldActivityDetector": YOLOWorldActivityDetector,
         "MoondreamActivityDetector": MoondreamActivityDetector,
     },
     "security_logging": {
@@ -113,7 +117,7 @@ class ActivityManager:
             self.logger.info("Activity detection stopped.")
 
     @classmethod
-    def from_config(cls, config: dict[str | None]):
+    def from_config(cls, config: dict[str, Any]):
         components = {}
 
         for component_type, component_config in config.items():
