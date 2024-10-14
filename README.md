@@ -1,8 +1,14 @@
 # Suspicious Activity Detection System
 
-The Suspicious Activity Detection System is a Python application that monitors a live video stream from a camera,
+The Suspicious Activity Detection System (SADS) is a Python application that monitors a live video stream from a camera,
 detects suspicious activity using some type of classification model, and logs security events with a captured video and
-console logs. The system follows SOLID principles to ensure a modular, extensible, and maintainable architecture.
+console logs.
+
+## TODO
+
+- [ ] Evaluate the models for person detection (we have no ground truth yet lol)
+- [ ] Add background task of summarising captured video
+- [ ] Add email client to send captured video to end user
 
 ## Architecture Diagram
 
@@ -10,16 +16,15 @@ console logs. The system follows SOLID principles to ensure a modular, extensibl
 
 ![Architecture Diagram][architecture-diagram]
 
-
 ## Key Features
 
 - Real-time video stream processing from an IP camera
-- Suspicious activity detection using the Moondream image-text vision model or YoloWorld object detection model
+- Person detection using the Moondream image-text vision model or YoloWorld object detection model
 - Video capture and security logging triggered by suspicious activity
-- Modular architecture following SOLID principles
 - Extensible design for adding new detection criteria and logging mechanisms
 
 ## License
+
 This project is licensed under the MIT License.
 
 ## Installation
@@ -70,11 +75,13 @@ This project is licensed under the MIT License.
 ## Usage
 
 For local development, you can run the application using the following command:
+
 ```bash
 poetry run activity-detection
 ```
 
 To run the application in a Docker container, use the following command:
+
 ```bash
 docker build -t activity-detection .
 docker run activity-detection
@@ -83,6 +90,7 @@ docker run activity-detection
 ## Testing
 
 To run the test suite, use the following command:
+
 ```bash
 poetry run pytest
 ```
