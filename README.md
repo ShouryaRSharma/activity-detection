@@ -60,7 +60,17 @@ This project is licensed under the MIT License.
       DefaultImageProcessor: {}
 
     activity_detector:
-      YOLOActivityDetector: {}
+      # Pick one of the below
+      YOLOActivityDetector:
+        args:
+          - 0.9 # Confidence threshold
+      YOLOWorldActivityDetector:
+        args:
+          - 0.9 # Confidence threshold
+      MoondreamActivityDetector:
+        args:
+          - "vikhyatk/moondream2" # Model name
+          - "2024-08-26" # Revision date
 
     security_logging:
       DefaultSecurityLogging: {}
