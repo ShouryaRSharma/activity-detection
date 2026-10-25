@@ -1,5 +1,6 @@
 import numpy as np
 from PIL import Image
+
 from activity_detection.processing.image_processing import DefaultImageProcessor
 
 

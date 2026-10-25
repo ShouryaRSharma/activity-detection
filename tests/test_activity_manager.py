@@ -11,7 +11,7 @@ class FailingCamera:
         pass
 
     def get_frame(self):
-        raise IOError("camera offline")
+        raise OSError("camera offline")
 
 
 class PassthroughProcessor:

@@ -1,6 +1,6 @@
 import threading
 from queue import Empty, Full, Queue
-from typing import Any, Type
+from typing import Any
 
 from activity_detection.classifiers import (
     MoondreamActivityDetector,
@@ -24,7 +24,7 @@ from activity_detection.security.security_capture import DefaultVideoCapture
 from activity_detection.security.security_logging import DefaultSecurityLogging
 from activity_detection.security.security_module import SecurityModule
 
-COMPONENT_MAPPING: dict[str, dict[str | None, Type]] = {
+COMPONENT_MAPPING: dict[str, dict[str | None, type]] = {
     "camera_input": {
         "IPCamera": IPCamera,
         "LocalCamera": LocalCamera,
@@ -80,7 +80,7 @@ class ActivityManager:
                     self.frame_queue.put(frame, timeout=0.5)
                 except Full:
                     self.logger.warning("Frame queue is full. Skipping frame.")
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             self._record_error(exc)
 
     def process_frames(self):
@@ -91,31 +91,25 @@ class ActivityManager:
                 except Empty:
                     continue
                 processed_image = self.image_processor.process_frame(frame)
-                prediction = self.activity_detector.detect_activity(
-                    processed_image
-                )
+                prediction = self.activity_detector.detect_activity(processed_image)
                 try:
-                    self.processed_frame_queue.put(
-                        (frame, prediction), timeout=0.5
-                    )
+                    self.processed_frame_queue.put((frame, prediction), timeout=0.5)
                 except Full:
                     self.logger.warning(
                         "Processed frame queue is full. Skipping frame."
                     )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             self._record_error(exc)
 
     def write_video(self):
         try:
             while not self.stop_event.is_set():
                 try:
-                    frame, prediction = self.processed_frame_queue.get(
-                        timeout=0.5
-                    )
+                    frame, prediction = self.processed_frame_queue.get(timeout=0.5)
                 except Empty:
                     continue
                 self.security_module.process_frame(frame, prediction)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             self._record_error(exc)
 
     def run_activity_detection(self):

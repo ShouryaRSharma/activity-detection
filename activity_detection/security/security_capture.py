@@ -1,6 +1,6 @@
 import datetime
 import time
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from pathlib import Path
 
 import cv2
@@ -68,8 +68,7 @@ class DefaultVideoCapture(VideoCaptureInterface):
                 self._open_writer(frame)
             elif (
                 self.clip_started_at is not None
-                and time.monotonic() - self.clip_started_at
-                >= self.max_clip_seconds
+                and time.monotonic() - self.clip_started_at >= self.max_clip_seconds
             ):
                 self._release_writer()
                 self._open_writer(frame)
@@ -82,18 +81,14 @@ class DefaultVideoCapture(VideoCaptureInterface):
     def _open_writer(self, frame: np.ndarray):
         height, width = frame.shape[:2]
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-        self.output_file = (
-            self.output_dir / f"suspicious_activity_{timestamp}.mp4"
-        )
+        self.output_file = self.output_dir / f"suspicious_activity_{timestamp}.mp4"
         fourcc = cv2.VideoWriter.fourcc(*"mp4v")
         self.video_writer = cv2.VideoWriter(
             str(self.output_file), fourcc, self.fps, (width, height)
         )
         if not self.video_writer.isOpened():
             self.video_writer = None
-            raise ValueError(
-                f"Failed to open video writer for {self.output_file}"
-            )
+            raise ValueError(f"Failed to open video writer for {self.output_file}")
         self.clip_started_at = time.monotonic()
         self.logger.info("Video capture started: %s", self.output_file)
 

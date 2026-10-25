@@ -1,11 +1,13 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 from PIL import Image
-from activity_detection.classifiers.types import Prediction
+
 from activity_detection.classifiers import (
     MoondreamActivityDetector,
     YOLOActivityDetector,
 )
+from activity_detection.classifiers.types import Prediction
 from activity_detection.classifiers.yolo_classifiers import (
     validate_model_reference,
 )
@@ -20,11 +22,10 @@ def mock_image():
 
 @pytest.fixture
 def mock_moondream_model():
-    with patch(
-        "transformers.AutoModelForCausalLM.from_pretrained"
-    ) as mock_model, patch(
-        "transformers.AutoTokenizer.from_pretrained"
-    ) as mock_tokenizer:
+    with (
+        patch("transformers.AutoModelForCausalLM.from_pretrained") as mock_model,
+        patch("transformers.AutoTokenizer.from_pretrained") as mock_tokenizer,
+    ):
         mock_model.return_value.to.return_value.answer_question.return_value = "YES"
         yield mock_model, mock_tokenizer
 
@@ -144,9 +145,10 @@ def test_detect_activity_edge_cases(
 
 
 def test_moondream_disables_remote_code_by_default():
-    with patch(
-        "transformers.AutoModelForCausalLM.from_pretrained"
-    ) as mock_model, patch("transformers.AutoTokenizer.from_pretrained"):
+    with (
+        patch("transformers.AutoModelForCausalLM.from_pretrained") as mock_model,
+        patch("transformers.AutoTokenizer.from_pretrained"),
+    ):
         mock_model.return_value.to.return_value = MagicMock()
 
         MoondreamActivityDetector("vikhyatk/moondream2", "2025-06-21")
@@ -162,9 +164,10 @@ def test_moondream_remote_code_requires_commit_sha():
 
 
 def test_moondream_remote_code_accepts_pinned_sha():
-    with patch(
-        "transformers.AutoModelForCausalLM.from_pretrained"
-    ) as mock_model, patch("transformers.AutoTokenizer.from_pretrained"):
+    with (
+        patch("transformers.AutoModelForCausalLM.from_pretrained") as mock_model,
+        patch("transformers.AutoTokenizer.from_pretrained"),
+    ):
         mock_model.return_value.to.return_value = MagicMock()
 
         MoondreamActivityDetector(

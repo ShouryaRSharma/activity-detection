@@ -1,8 +1,7 @@
-import numpy as np
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+import numpy as np
 from torch.functional import Tensor
-from dataclasses import field
 
 
 @dataclass

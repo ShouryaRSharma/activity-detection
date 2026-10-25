@@ -1,6 +1,7 @@
 import re
 
 import torch
+from PIL import Image
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
@@ -8,11 +9,10 @@ from transformers import (
     PreTrainedTokenizer,
 )
 
-from activity_detection.classifiers.types import Prediction
 from activity_detection.classifiers.interfaces import (
     ActivityDetectionInterface,
 )
-from PIL import Image
+from activity_detection.classifiers.types import Prediction
 
 _COMMIT_SHA = re.compile(r"^[0-9a-f]{40}$")
 

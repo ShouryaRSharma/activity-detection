@@ -1,8 +1,7 @@
 import time
-
-import cv2
 from abc import ABC, abstractmethod
 
+import cv2
 import numpy as np
 
 from activity_detection.logging_config import setup_logger
@@ -37,7 +36,7 @@ class CameraBase(CameraInputInterface):
             raise ValueError("Camera capture is not initialized")
 
         if not self.capture.isOpened():
-            raise IOError("Cannot open camera")
+            raise OSError("Cannot open camera")
 
         self.original_fps = self.capture.get(cv2.CAP_PROP_FPS)
         if self.original_fps == 0:
@@ -72,9 +71,9 @@ class CameraBase(CameraInputInterface):
                 self.last_frame_time = time.time()
                 return frame
             else:
-                raise IOError("Failed to retrieve frame from camera")
+                raise OSError("Failed to retrieve frame from camera")
         else:
-            raise IOError("Camera capture is not initialized")
+            raise OSError("Camera capture is not initialized")
 
 
 class IPCamera(CameraBase):

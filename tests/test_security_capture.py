@@ -1,3 +1,4 @@
+from typing import ClassVar
 from unittest.mock import patch
 
 import numpy as np
@@ -7,7 +8,7 @@ from activity_detection.security.security_capture import DefaultVideoCapture
 
 
 class FakeWriter:
-    instances = []
+    instances: ClassVar[list] = []
 
     def __init__(self, path, fourcc, fps, size):
         self.path = path
@@ -58,12 +59,15 @@ def test_capture_rotates_after_max_clip_seconds(tmp_path):
     frame = np.zeros((10, 20, 3), dtype=np.uint8)
     capture = DefaultVideoCapture(str(tmp_path / "clips"), max_clip_seconds=1.0)
 
-    with patch(
-        "activity_detection.security.security_capture.cv2.VideoWriter",
-        FakeWriter,
-    ), patch(
-        "activity_detection.security.security_capture.time.monotonic",
-        side_effect=[0.0, 2.0, 2.0],
+    with (
+        patch(
+            "activity_detection.security.security_capture.cv2.VideoWriter",
+            FakeWriter,
+        ),
+        patch(
+            "activity_detection.security.security_capture.time.monotonic",
+            side_effect=[0.0, 2.0, 2.0],
+        ),
     ):
         capture.start_video_capture()
         capture.capture_frame(frame)
