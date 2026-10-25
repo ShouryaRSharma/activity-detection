@@ -1,65 +1,53 @@
-ARG POETRY_VERSION=1.8.2
+FROM python:3.11-slim-bookworm AS builder
 
-FROM python:3.11.4 AS base
+ENV PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    POETRY_VERSION=2.5.1 \
+    POETRY_VIRTUALENVS_IN_PROJECT=true \
+    POETRY_NO_INTERACTION=1 \
+    PATH="/app/.venv/bin:$PATH"
 
-ARG POETRY_VERSION
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN pip install poetry==${POETRY_VERSION} --no-cache-dir
+RUN pip install --no-cache-dir "poetry==${POETRY_VERSION}"
 
-WORKDIR /temp
+WORKDIR /app
+COPY pyproject.toml poetry.lock ./
+RUN poetry install --only main --no-root --no-ansi
 
-COPY ./pyproject.toml /temp/pyproject.toml
-COPY ./poetry.lock /temp/poetry.lock
 
-RUN poetry config virtualenvs.create false \
-    && poetry export --without-hashes -f requirements.txt --output requirements.txt \
-    && poetry export --without-hashes --dev -f requirements.txt --output requirements-dev.txt
+FROM builder AS test
 
-FROM python:3.11.4-slim-buster AS app-base
+RUN poetry install --only main,dev --no-root --no-ansi
+COPY activity_detection ./activity_detection
+COPY tests ./tests
+COPY config.yaml.template ./config.yaml.template
 
-ARG POETRY_VERSION
+ENTRYPOINT ["python", "-m", "pytest"]
 
-WORKDIR /code
 
-RUN apt-get update && apt-get install -y curl \
-    && pip install poetry==${POETRY_VERSION} --no-cache-dir
+FROM python:3.11-slim-bookworm AS runtime
 
-RUN addgroup --system activity_detection \
-    && adduser --system --ingroup activity_detection activity_detection \
-    && chown -R activity_detection:activity_detection /usr/local/lib/python3.11/site-packages \
-    && chown -R activity_detection:activity_detection /usr/local/bin \
-    && chown -R activity_detection:activity_detection /code
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/app/.venv/bin:$PATH"
 
-FROM app-base AS test
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libgl1 libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system app \
+    && useradd --system --gid app --home-dir /app --shell /usr/sbin/nologin app
 
-ENV POETRY_VIRTUALENVS_CREATE=false
+WORKDIR /app
+COPY --from=builder /app/.venv /app/.venv
+COPY activity_detection ./activity_detection
+COPY config.yaml.template ./config.yaml.template
 
-COPY --from=base /temp/requirements-dev.txt /code/requirements-dev.txt
+RUN mkdir -p /app/suspicious_activity_videos \
+    && chown -R app:app /app
 
-# Installing dev requirements as root
-RUN pip install --upgrade -r requirements-dev.txt --no-cache-dir
-
-USER activity_detection
-
-COPY ./activity_detection /code/activity_detection
-COPY ./tests /code/tests
-COPY ./pyproject.toml /code/pyproject.toml
-COPY ./poetry.lock /code/poetry.lock
-
-ENTRYPOINT ["python", "-m", "activity_detection.main"]
-
-FROM app-base AS production
-
-ENV POETRY_VIRTUALENVS_CREATE=false
-
-COPY --from=base /temp/requirements.txt /code/requirements.txt
-
-RUN pip install --upgrade -r requirements.txt --no-cache-dir
-
-USER activity_detection
-
-COPY ./activity_detection /code/activity_detection
-COPY ./pyproject.toml /code/pyproject.toml
-COPY ./poetry.lock /code/poetry.lock
+USER app
 
 ENTRYPOINT ["python", "-m", "activity_detection.main"]
