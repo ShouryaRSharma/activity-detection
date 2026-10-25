@@ -12,6 +12,8 @@ coverage.xml
 
 # Local model weights and recordings
 models
+*.pt
+*.pth
 *.onnx
 *.engine
 *.db
