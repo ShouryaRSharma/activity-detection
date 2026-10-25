@@ -6,23 +6,23 @@ authors = ["Shourya Sharma <shourya.sharma@complyadvantage.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
-transformers = "^4.41.2"
-einops = "^0.8.0"
-setuptools = "^70.0.0"
-opencv-contrib-python-headless = "^4.10.0.82"
-pillow = "^10.3.0"
-torch = "^2.3.1"
-torchvision = "^0.18.1"
-ultralytics = "^8.2.31"
-python-dotenv = "^1.0.1"
-pyyaml = "^6.0.1"
+python = ">=3.11,<3.14"
+transformers = "^5.20.2"
+einops = "^0.8.2"
+opencv-contrib-python-headless = "^5.0.0.93"
+pillow = "^13.0.0"
+torch = "^2.14.1"
+torchvision = "^0.29.1"
+ultralytics = "^8.4.188"
+pyyaml = "^6.0.3"
+numpy = "^2.4.6"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.4.8"
-pytest = "^8.2.2"
-pre-commit = "^3.7.1"
-pytest-cov = "^5.0.0"
+ruff = "^0.17.2"
+pytest = "^9.1.1"
+pre-commit = "^4.7.0"
+pytest-cov = "^7.1.0"
+pip-audit = "^2.10.1"
 
 [tool.poetry.scripts]
 activity-detection = "activity_detection.main:main"
