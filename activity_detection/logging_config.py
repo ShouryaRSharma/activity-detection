@@ -3,6 +3,9 @@ import logging
 
 def setup_logger(name: str, level=logging.INFO):
     logger = logging.getLogger(name)
+    if logger.handlers:
+        return logger
+
     logger.setLevel(level)
 
     formatter = logging.Formatter(
