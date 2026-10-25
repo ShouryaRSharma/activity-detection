@@ -60,61 +60,90 @@ class ActivityManager:
         self.security_module = security_module
         self.frame_queue = Queue(maxsize=100)
         self.processed_frame_queue = Queue(maxsize=100)
-        self.running = True
+        self.stop_event = threading.Event()
+        self._thread_errors: list[BaseException] = []
+        self._error_lock = threading.Lock()
         self.logger = setup_logger(self.__class__.__name__)
 
+    def _record_error(self, exc: BaseException):
+        with self._error_lock:
+            self._thread_errors.append(exc)
+        self.logger.exception("Worker thread failed: %s", exc)
+        self.stop_event.set()
+
     def capture_frames(self):
-        self.camera_input.start_capture()
-        while self.running:
-            frame = self.camera_input.get_frame()
-            try:
-                self.frame_queue.put_nowait(frame)
-            except Full:
-                self.logger.warning("Frame queue is full. Skipping frame.")
+        try:
+            self.camera_input.start_capture()
+            while not self.stop_event.is_set():
+                frame = self.camera_input.get_frame()
+                try:
+                    self.frame_queue.put(frame, timeout=0.5)
+                except Full:
+                    self.logger.warning("Frame queue is full. Skipping frame.")
+        except Exception as exc:
+            self._record_error(exc)
 
     def process_frames(self):
-        while self.running:
-            try:
-                frame = self.frame_queue.get()
-                processed_image = self.image_processor.process_frame(frame)
-                prediction = self.activity_detector.detect_activity(processed_image)
+        try:
+            while not self.stop_event.is_set():
                 try:
-                    self.processed_frame_queue.put((frame, prediction))
+                    frame = self.frame_queue.get(timeout=0.5)
+                except Empty:
+                    continue
+                processed_image = self.image_processor.process_frame(frame)
+                prediction = self.activity_detector.detect_activity(
+                    processed_image
+                )
+                try:
+                    self.processed_frame_queue.put(
+                        (frame, prediction), timeout=0.5
+                    )
                 except Full:
                     self.logger.warning(
                         "Processed frame queue is full. Skipping frame."
                     )
-            except Empty:
-                pass
+        except Exception as exc:
+            self._record_error(exc)
 
     def write_video(self):
-        while self.running:
-            try:
-                frame, prediction = self.processed_frame_queue.get()
+        try:
+            while not self.stop_event.is_set():
+                try:
+                    frame, prediction = self.processed_frame_queue.get(
+                        timeout=0.5
+                    )
+                except Empty:
+                    continue
                 self.security_module.process_frame(frame, prediction)
-            except Empty:
-                pass
+        except Exception as exc:
+            self._record_error(exc)
 
     def run_activity_detection(self):
+        threads = [
+            threading.Thread(target=self.capture_frames, daemon=True),
+            threading.Thread(target=self.process_frames, daemon=True),
+            threading.Thread(target=self.write_video, daemon=True),
+        ]
         try:
-            capture_thread = threading.Thread(target=self.capture_frames)
-            process_thread = threading.Thread(target=self.process_frames)
-            write_thread = threading.Thread(target=self.write_video)
-
-            capture_thread.start()
-            process_thread.start()
-            write_thread.start()
-
-            capture_thread.join()
-            process_thread.join()
-            write_thread.join()
+            for thread in threads:
+                thread.start()
+            for thread in threads:
+                thread.join()
         except KeyboardInterrupt:
             self.logger.info("Interrupted by user. Stopping the program.")
         finally:
-            self.running = False
+            self.stop_event.set()
             self.camera_input.stop_capture()
             self.security_module.video_capture.stop_video_capture()
+            for thread in threads:
+                if thread.is_alive():
+                    thread.join(timeout=5)
             self.logger.info("Activity detection stopped.")
+
+        if self._thread_errors:
+            raise RuntimeError("One or more worker threads failed") from (
+                self._thread_errors[0]
+            )
 
     @classmethod
     def from_config(cls, config: dict[str, Any]):
