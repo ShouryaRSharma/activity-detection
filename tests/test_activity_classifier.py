@@ -6,6 +6,9 @@ from activity_detection.classifiers import (
     MoondreamActivityDetector,
     YOLOActivityDetector,
 )
+from activity_detection.classifiers.yolo_classifiers import (
+    validate_model_reference,
+)
 
 PINNED_REVISION = "a" * 40
 
@@ -170,3 +173,37 @@ def test_moondream_remote_code_accepts_pinned_sha():
 
         assert mock_model.call_args.kwargs["trust_remote_code"] is True
         assert mock_model.call_args.kwargs["revision"] == PINNED_REVISION
+
+
+@pytest.mark.parametrize(
+    "model_path",
+    [
+        "https://evil.example/model.pt",
+        "http://evil.example/model.pt",
+        "../model.pt",
+        "nested/../../model.pt",
+        "model.bin",
+        "",
+    ],
+)
+def test_rejects_unsafe_yolo_model_references(model_path):
+    with pytest.raises(ValueError):
+        validate_model_reference(model_path)
+
+
+def test_accepts_relative_yolo_model(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "model.pt").write_bytes(b"weights")
+    assert validate_model_reference("model.pt") == "model.pt"
+
+
+def test_rejects_symlink_escape(tmp_path, monkeypatch):
+    outside = tmp_path / "outside.pt"
+    outside.write_bytes(b"weights")
+    workdir = tmp_path / "work"
+    workdir.mkdir()
+    (workdir / "model.pt").symlink_to(outside)
+    monkeypatch.chdir(workdir)
+
+    with pytest.raises(ValueError):
+        validate_model_reference("model.pt")

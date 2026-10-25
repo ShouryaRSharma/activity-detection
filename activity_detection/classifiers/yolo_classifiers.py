@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -13,10 +14,41 @@ from activity_detection.classifiers.interfaces import (
 from activity_detection.classifiers.types import Prediction
 
 
+def validate_model_reference(model_path: str) -> str:
+    """Reject remote, traversal, and non-PyTorch model references."""
+    if not isinstance(model_path, str) or not model_path.strip():
+        raise ValueError("model_path must be a non-empty string")
+    if "://" in model_path:
+        raise ValueError("Remote model URLs are not allowed")
+
+    path = Path(model_path)
+    if ".." in path.parts:
+        raise ValueError("model_path must not contain '..'")
+    if path.suffix.lower() != ".pt":
+        raise ValueError("Only .pt model files are supported")
+
+    if path.is_absolute():
+        if not path.is_file():
+            raise ValueError("Absolute model paths must point to an existing file")
+        return str(path)
+
+    cwd = Path.cwd().resolve()
+    resolved = (cwd / path).resolve()
+    try:
+        resolved.relative_to(cwd)
+    except ValueError as exc:
+        raise ValueError("Model path escapes the working directory") from exc
+    if resolved.exists() and not resolved.is_file():
+        raise ValueError("Model path must point to a file")
+    return model_path
+
+
 class BaseYOLODetector(ActivityDetectionInterface, ABC):
     def __init__(self, model_path: str, confidence_threshold: float = 0.5):
         super().__init__()
-        self.model = self.load_model(model_path).to(self.device.value)
+        self.model = self.load_model(validate_model_reference(model_path)).to(
+            self.device.value
+        )
         self.confidence_threshold = confidence_threshold
 
     @abstractmethod
