@@ -23,11 +23,10 @@ jobs:
       - name: Run tests
         run: |
           mkdir -p test-reports
-          chmod 777 test-reports
           docker run --rm \
             -v "$PWD/test-reports:/app/test-reports" \
             activity-detection:test \
-            --cov=. \
+            --cov=activity_detection \
             --cov-report=xml:test-reports/coverage.xml \
             --cov-report=term \
             --cov-report=html:test-reports/htmlcov \
