@@ -52,9 +52,9 @@ This project is licensed under the MIT License.
       IPCamera:
         args:
           - "<IPV4_ADDRESS>"
-      LocalCamera:
-        args:
-          - 0
+      # LocalCamera:
+      #   args:
+      #     - 0
 
     image_processor:
       DefaultImageProcessor: {}
@@ -63,15 +63,17 @@ This project is licensed under the MIT License.
       # Pick one of the below
       YOLOActivityDetector:
         args:
+          - "yolo11m.pt" # Local model file
           - 0.9 # Confidence threshold
-      YOLOWorldActivityDetector:
-        args:
-          - 0.9 # Confidence threshold
-      MoondreamActivityDetector:
-        args:
-          - "vikhyatk/moondream2" # Model name
-          - "5d6c926f44e26b07957b0dd315bbedcb4c17a5fe" # Pinned commit SHA
-          - true # Explicitly allow remote model code
+      # YOLOWorldActivityDetector:
+      #   args:
+      #     - "yolov8m-worldv2.pt" # Local model file
+      #     - 0.9 # Confidence threshold
+      # MoondreamActivityDetector:
+      #   args:
+      #     - "vikhyatk/moondream2" # Model name
+      #     - "5d6c926f44e26b07957b0dd315bbedcb4c17a5fe" # Pinned commit SHA
+      #     - true # Explicitly allow remote model code
 
     security_logging:
       DefaultSecurityLogging: {}

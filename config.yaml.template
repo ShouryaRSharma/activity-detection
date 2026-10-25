@@ -14,9 +14,11 @@ activity_detector:
   # Pick one of the below
   YOLOActivityDetector:
     args:
+      - "yolo11m.pt"
       - 0.9
   # YOLOWorldActivityDetector:
   #   args:
+  #     - "yolov8m-worldv2.pt"
   #     - 0.9
   # MoondreamActivityDetector:
   #   args:

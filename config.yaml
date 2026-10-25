@@ -12,6 +12,7 @@ image_processor:
 activity_detector:
   YOLOActivityDetector:
     args:
+      - "yolo11m.pt"
       - 0.9
 
 security_logging:
