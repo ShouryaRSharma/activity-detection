@@ -4,6 +4,9 @@ import logging
 def setup_logger(name: str, level=logging.INFO):
     logger = logging.getLogger(name)
     logger.setLevel(level)
+    logger.propagate = False
+    if logger.handlers:
+        return logger
 
     formatter = logging.Formatter(
         "%(asctime)s - %(threadName)s - %(name)s - %(levelname)s - %(message)s"

@@ -1,6 +1,7 @@
+from pathlib import Path
+
 import yaml
 
-from pathlib import Path
 from activity_detection.activity_manager import ActivityManager
 
 

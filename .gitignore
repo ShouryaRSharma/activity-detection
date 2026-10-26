@@ -1,10 +1,23 @@
 .idea
+.venv
+.pytest_cache
+.ruff_cache
+*.egg-info
 
 **/*/__pycache__/
 
 .coverage
 test-reports
 coverage.xml
+
+# Local model weights and recordings
+models
+*.pt
+*.pth
+*.onnx
+*.engine
+*.db
+suspicious_activity_videos
 
 .DS_Store
 

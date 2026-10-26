@@ -31,8 +31,8 @@ This project is licensed under the MIT License.
 
 ### Prerequisites
 
-- Python 3.11 or higher
-- Poetry 1.8 or higher
+- Python 3.11 through 3.13
+- Poetry 2.x
 - Docker
 
 ### Setup
@@ -44,7 +44,7 @@ This project is licensed under the MIT License.
     poetry install
     ```
 
-3. Create a `config.yaml` file in the project root directory with the following environment variables:
+3. Copy `config.yaml.template` to `config.yaml` and edit it with the following settings:
 
     ```yaml
     camera_input:
@@ -52,9 +52,9 @@ This project is licensed under the MIT License.
       IPCamera:
         args:
           - "<IPV4_ADDRESS>"
-      LocalCamera:
-        args:
-          - 0
+      # LocalCamera:
+      #   args:
+      #     - 0
 
     image_processor:
       DefaultImageProcessor: {}
@@ -63,14 +63,17 @@ This project is licensed under the MIT License.
       # Pick one of the below
       YOLOActivityDetector:
         args:
+          - "yolo11m.pt" # Local model file
           - 0.9 # Confidence threshold
-      YOLOWorldActivityDetector:
-        args:
-          - 0.9 # Confidence threshold
-      MoondreamActivityDetector:
-        args:
-          - "vikhyatk/moondream2" # Model name
-          - "2024-08-26" # Revision date
+      # YOLOWorldActivityDetector:
+      #   args:
+      #     - "yolov8m-worldv2.pt" # Local model file
+      #     - 0.9 # Confidence threshold
+      # MoondreamActivityDetector:
+      #   args:
+      #     - "vikhyatk/moondream2" # Model name
+      #     - "5d6c926f44e26b07957b0dd315bbedcb4c17a5fe" # Pinned commit SHA
+      #     - true # Explicitly allow remote model code
 
     security_logging:
       DefaultSecurityLogging: {}
@@ -82,6 +85,13 @@ This project is licensed under the MIT License.
 
     ```
 
+`MoondreamActivityDetector` loads custom model code. Remote code is disabled by
+default. If you enable it, use a full 40-character commit SHA as the revision.
+Only load models you trust.
+
+`YOLOActivityDetector` only accepts local `.pt` files and rejects URLs, path
+traversal, and symlinks that escape the working directory.
+
 ## Usage
 
 For local development, you can run the application using the following command:
@@ -90,11 +100,15 @@ For local development, you can run the application using the following command:
 poetry run activity-detection
 ```
 
-To run the application in a Docker container, use the following command:
+To run the application in a Docker container, mount your configuration and
+recordings directory:
 
 ```bash
 docker build -t activity-detection .
-docker run activity-detection
+docker run --rm \
+  -v "$(pwd)/config.yaml:/app/config.yaml:ro" \
+  -v "$(pwd)/suspicious_activity_videos:/app/suspicious_activity_videos" \
+  activity-detection
 ```
 
 ## Testing

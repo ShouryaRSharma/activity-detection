@@ -1,11 +1,18 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 from PIL import Image
-from activity_detection.classifiers.types import Prediction
+
 from activity_detection.classifiers import (
     MoondreamActivityDetector,
     YOLOActivityDetector,
 )
+from activity_detection.classifiers.types import Prediction
+from activity_detection.classifiers.yolo_classifiers import (
+    validate_model_reference,
+)
+
+PINNED_REVISION = "a" * 40
 
 
 @pytest.fixture
@@ -15,11 +22,10 @@ def mock_image():
 
 @pytest.fixture
 def mock_moondream_model():
-    with patch(
-        "transformers.AutoModelForCausalLM.from_pretrained"
-    ) as mock_model, patch(
-        "transformers.AutoTokenizer.from_pretrained"
-    ) as mock_tokenizer:
+    with (
+        patch("transformers.AutoModelForCausalLM.from_pretrained") as mock_model,
+        patch("transformers.AutoTokenizer.from_pretrained") as mock_tokenizer,
+    ):
         mock_model.return_value.to.return_value.answer_question.return_value = "YES"
         yield mock_model, mock_tokenizer
 
@@ -53,7 +59,9 @@ def test_detect_activity_with_person(
     mock_model = request.getfixturevalue(mock_model_fixture)
 
     if detector_class == MoondreamActivityDetector:
-        detector = detector_class("model_id", "revision")
+        detector = detector_class(
+            "vikhyatk/moondream2", PINNED_REVISION, allow_remote_code=True
+        )
     else:
         detector = detector_class()
 
@@ -91,7 +99,9 @@ def test_detect_activity_without_person(
         mock_model[
             0
         ].return_value.to.return_value.answer_question.return_value = model_output
-        detector = detector_class("model_id", "revision")
+        detector = detector_class(
+            "vikhyatk/moondream2", PINNED_REVISION, allow_remote_code=True
+        )
     else:
         mock_model.return_value.to.return_value.predict.return_value[
             0
@@ -120,7 +130,9 @@ def test_detect_activity_edge_cases(
         mock_model[
             0
         ].return_value.to.return_value.answer_question.return_value = model_output
-        detector = detector_class("model_id", "revision")
+        detector = detector_class(
+            "vikhyatk/moondream2", PINNED_REVISION, allow_remote_code=True
+        )
         with pytest.raises(ValueError, match="Invalid answer from the model"):
             detector.detect_activity(mock_image)
     else:
@@ -130,3 +142,71 @@ def test_detect_activity_edge_cases(
         detector = detector_class()
         result = detector.detect_activity(mock_image)
         assert result.detected is False
+
+
+def test_moondream_disables_remote_code_by_default():
+    with (
+        patch("transformers.AutoModelForCausalLM.from_pretrained") as mock_model,
+        patch("transformers.AutoTokenizer.from_pretrained"),
+    ):
+        mock_model.return_value.to.return_value = MagicMock()
+
+        MoondreamActivityDetector("vikhyatk/moondream2", "2025-06-21")
+
+        assert mock_model.call_args.kwargs["trust_remote_code"] is False
+
+
+def test_moondream_remote_code_requires_commit_sha():
+    with pytest.raises(ValueError, match="40-character commit SHA"):
+        MoondreamActivityDetector(
+            "vikhyatk/moondream2", "2025-06-21", allow_remote_code=True
+        )
+
+
+def test_moondream_remote_code_accepts_pinned_sha():
+    with (
+        patch("transformers.AutoModelForCausalLM.from_pretrained") as mock_model,
+        patch("transformers.AutoTokenizer.from_pretrained"),
+    ):
+        mock_model.return_value.to.return_value = MagicMock()
+
+        MoondreamActivityDetector(
+            "vikhyatk/moondream2", PINNED_REVISION, allow_remote_code=True
+        )
+
+        assert mock_model.call_args.kwargs["trust_remote_code"] is True
+        assert mock_model.call_args.kwargs["revision"] == PINNED_REVISION
+
+
+@pytest.mark.parametrize(
+    "model_path",
+    [
+        "https://evil.example/model.pt",
+        "http://evil.example/model.pt",
+        "../model.pt",
+        "nested/../../model.pt",
+        "model.bin",
+        "",
+    ],
+)
+def test_rejects_unsafe_yolo_model_references(model_path):
+    with pytest.raises(ValueError):
+        validate_model_reference(model_path)
+
+
+def test_accepts_relative_yolo_model(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "model.pt").write_bytes(b"weights")
+    assert validate_model_reference("model.pt") == "model.pt"
+
+
+def test_rejects_symlink_escape(tmp_path, monkeypatch):
+    outside = tmp_path / "outside.pt"
+    outside.write_bytes(b"weights")
+    workdir = tmp_path / "work"
+    workdir.mkdir()
+    (workdir / "model.pt").symlink_to(outside)
+    monkeypatch.chdir(workdir)
+
+    with pytest.raises(ValueError):
+        validate_model_reference("model.pt")

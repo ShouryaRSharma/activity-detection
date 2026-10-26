@@ -1,4 +1,7 @@
+import re
+
 import torch
+from PIL import Image
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
@@ -6,24 +9,38 @@ from transformers import (
     PreTrainedTokenizer,
 )
 
-from activity_detection.classifiers.types import Prediction
 from activity_detection.classifiers.interfaces import (
     ActivityDetectionInterface,
 )
-from PIL import Image
+from activity_detection.classifiers.types import Prediction
+
+_COMMIT_SHA = re.compile(r"^[0-9a-f]{40}$")
 
 
 class MoondreamActivityDetector(ActivityDetectionInterface):
-    def __init__(self, model_id: str, revision: str):
+    def __init__(
+        self,
+        model_id: str,
+        revision: str,
+        allow_remote_code: bool = False,
+    ):
         super().__init__()
+        if allow_remote_code and not _COMMIT_SHA.fullmatch(revision):
+            raise ValueError(
+                "A full 40-character commit SHA revision is required when "
+                "allow_remote_code is enabled"
+            )
         self.model: PreTrainedModel = AutoModelForCausalLM.from_pretrained(
             model_id,
-            trust_remote_code=True,
+            trust_remote_code=allow_remote_code,
             revision=revision,
-            torch_dtype=torch.float32,
+            dtype=torch.float32,
         ).to(self.device.value)
         self.tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(
-            model_id, revision=revision, use_fast=True
+            model_id,
+            revision=revision,
+            use_fast=True,
+            trust_remote_code=allow_remote_code,
         )
 
     def detect_activity(self, image: Image) -> Prediction:

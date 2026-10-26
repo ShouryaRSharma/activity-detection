@@ -1,0 +1,34 @@
+camera_input:
+  # Pick one of the below
+  IPCamera:
+    args:
+      - "http://192.168.1.100:8080/video"
+  # LocalCamera:
+  #   args:
+  #     - 0
+
+image_processor:
+  DefaultImageProcessor: {}
+
+activity_detector:
+  # Pick one of the below
+  YOLOActivityDetector:
+    args:
+      - "yolo11m.pt"
+      - 0.9
+  # YOLOWorldActivityDetector:
+  #   args:
+  #     - "yolov8m-worldv2.pt"
+  #     - 0.9
+  # MoondreamActivityDetector:
+  #   args:
+  #     - "vikhyatk/moondream2"
+  #     - "5d6c926f44e26b07957b0dd315bbedcb4c17a5fe"
+
+security_logging:
+  DefaultSecurityLogging: {}
+
+video_capture:
+  DefaultVideoCapture:
+    args:
+      - "suspicious_activity_videos"

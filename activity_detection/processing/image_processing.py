@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 
 import cv2
-from PIL import Image
 import numpy as np
+from PIL import Image
 
 
 class ImageProcessingInterface(ABC):

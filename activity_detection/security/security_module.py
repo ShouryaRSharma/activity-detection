@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
 
+from activity_detection.classifiers.types import Prediction
 from activity_detection.security.security_capture import VideoCaptureInterface
 from activity_detection.security.security_logging import SecurityLoggingInterface
-from activity_detection.classifiers.types import Prediction
 
 
 class SecurityModule:
